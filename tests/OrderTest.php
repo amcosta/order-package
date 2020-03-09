@@ -1,13 +1,10 @@
 <?php
 
-
 namespace Tests;
 
-
-use App\Contracts\IOrderItem;
-use App\Contracts\IProduct;
 use App\Order;
 use App\OrderItem;
+use App\Product;
 use PHPUnit\Framework\TestCase;
 
 class OrderTest extends TestCase
@@ -22,34 +19,40 @@ class OrderTest extends TestCase
         $this->assertCount(2, $order->getItems()->toArray());
     }
 
-    public function testIncreaseDecreaseQuantity()
+    public function testIncreaseAndDecreaseQuantity()
+    {
+        $itemName = 'Awesome product';
+        $itemPrice = 10;
+
+        $item = $this->buildItem($itemName, $itemPrice);
+        $order = new Order();
+
+        for ($i = 1; $i <= 5; $i++) {
+            $order->addItem($item);
+            $this->assertEquals(10 * $i, $order->getPrice());
+            $this->assertCount(1, $order->getItems()->toArray());
+        }
+
+        for ($i = 5; $i > 1; $i--) {
+            $this->assertEquals(10 * $i, $order->getPrice());
+            $this->assertCount(1, $order->getItems()->toArray());
+            $order->removeItem($item);
+        }
+    }
+
+    public function testSerializable()
     {
         $item = $this->buildItem('Item 1', 10);
         $order = new Order();
         $order->addItem($item);
 
-        $this->assertEquals(10, $order->getPrice());
-        $this->assertCount(1, $order->getItems()->toArray());
-
-        $order->addItem($item);
-        $this->assertEquals(20, $order->getPrice());
-        $this->assertCount(1, $order->getItems()->toArray());
-
-        $order->addItem($item);
-        $this->assertEquals(20, $order->getPrice());
-        $this->assertCount(1, $order->getItems()->toArray());
+        $string = serialize($order);
+        $this->assertIsString($string);
+        $this->assertInstanceOf(Order::class, unserialize($string));
     }
 
     private function buildItem($name, $price)
     {
-        return new OrderItem($this->buildProduct($name, $price));
-    }
-
-    private function buildProduct($name, $price)
-    {
-        $mock = $this->createMock(IProduct::class);
-        $mock->method('getName')->willReturn($name);
-        $mock->method('getPrice')->willReturn($price);
-        return $mock;
+        return new OrderItem(new Product($name, $price));
     }
 }

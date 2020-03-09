@@ -1,23 +1,28 @@
 <?php
 
-
 namespace App;
-
 
 use App\Contracts\IOrder;
 use App\Contracts\IOrderItem;
+use App\Exceptions\OrderQuantityException;
 use Doctrine\Common\Collections\ArrayCollection;
+use JMS\Serializer\Annotation as Serializer;
 
-class Order implements IOrder, \Serializable
+class Order implements IOrder, \Serializable, \JsonSerializable
 {
-    private $items;
+    use Traits\Serializer;
 
-    public function __construct()
+    /**
+     * @Serializer\Type("ArrayCollection<App\OrderItem>")
+     */
+    private ArrayCollection $items;
+
+    public function __construct(array $items = [])
     {
-        $this->items = new ArrayCollection();
+        $this->items = new ArrayCollection($items);
     }
 
-    public function addItem(IOrderItem $item)
+    public function addItem(IOrderItem $item): void
     {
         $key = $this->items->indexOf($item);
 
@@ -28,14 +33,38 @@ class Order implements IOrder, \Serializable
         }
     }
 
-    public function removeItem(IOrderItem $item)
+    public function removeItem(IOrderItem $item): void
     {
-        $this->items->removeElement($item);
+        $key = $this->items->indexOf($item);
+        if ($key === false) {
+            return;
+        }
+
+        /* @var IOrderItem $item */
+        $item = $this->items->get($key);
+
+        try {
+            $item->decreaseQuantity();
+        } catch (OrderQuantityException $exception) {
+            $this->removeAll($item);
+        }
     }
 
-    public function getPrice()
+    public function removeAll(IOrderItem $item): void
     {
-        $callback = function ($total, IOrderItem $item) {
+        if ($this->items->contains($item)) {
+            $this->items->removeElement($item);
+        }
+    }
+
+    public function removeAllItems()
+    {
+        $this->items->clear();
+    }
+
+    public function getPrice(): float
+    {
+        $callback = function (float $total, IOrderItem $item) {
             $total += $item->getTotal();
             return $total;
         };
@@ -43,24 +72,8 @@ class Order implements IOrder, \Serializable
         return array_reduce($this->items->toArray(), $callback, 0);
     }
 
-    public function getItems()
+    public function getItems(): ArrayCollection
     {
         return $this->items;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function serialize()
-    {
-        // TODO: Implement serialize() method.
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function unserialize($serialized)
-    {
-        // TODO: Implement unserialize() method.
     }
 }

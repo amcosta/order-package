@@ -6,7 +6,7 @@ namespace App\Contracts;
 
 interface IProduct
 {
-    public function getName();
+    public function getName(): string;
 
-    public function getPrice();
+    public function getPrice(): float;
 }

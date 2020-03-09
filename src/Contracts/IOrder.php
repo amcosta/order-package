@@ -8,11 +8,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 interface IOrder
 {
-    public function getItems();
+    public function getItems(): ArrayCollection;
 
-    public function addItem(IOrderItem $item);
+    public function addItem(IOrderItem $item): void;
 
-    public function removeItem(IOrderItem $item);
+    public function removeItem(IOrderItem $item): void;
 
-    public function getPrice();
+    public function getPrice(): float;
 }

@@ -1,46 +1,61 @@
 <?php
 
-
 namespace App;
-
 
 use App\Contracts\IOrderItem;
 use App\Contracts\IProduct;
+use App\Exceptions\OrderQuantityException;
+use JMS\Serializer\Annotation as Serializer;
 
-class OrderItem implements IOrderItem
+class OrderItem implements IOrderItem, \Serializable, \JsonSerializable
 {
-    private $product;
+    use Traits\Serializer;
 
-    private $quantity;
+    /**
+     * @Serializer\Type("App\Product")
+     */
+    private IProduct $product;
 
-    public function __construct(IProduct $product)
+    /**
+     * @Serializer\Type("int")
+     */
+    private int $quantity;
+
+    public function __construct(IProduct $product, int $quantity = 1)
     {
         $this->product = $product;
-        $this->quantity = 1;
+        $this->quantity = $quantity;
     }
 
-    public function getQuantity()
+    public function getQuantity(): int
     {
         return $this->quantity;
     }
 
-    public function getTotal()
+    public function getTotal(): float
     {
         return $this->product->getPrice() * $this->quantity;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->product->getName();
     }
 
-    public function increaseQuantity()
+    public function increaseQuantity(): void
     {
         $this->quantity++;
     }
 
-    public function decreaseQuantity()
+    /**
+     * @throws OrderQuantityException
+     */
+    public function decreaseQuantity(): void
     {
+        if ($this->quantity <= 1) {
+            throw new OrderQuantityException('It is not possible to have product with zero quantity');
+        }
+
         $this->quantity--;
     }
 }

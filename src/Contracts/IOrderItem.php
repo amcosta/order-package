@@ -4,15 +4,20 @@
 namespace App\Contracts;
 
 
+use App\Exceptions\OrderQuantityException;
+
 interface IOrderItem
 {
-    public function getQuantity();
+    public function getQuantity(): int;
 
-    public function getTotal();
+    public function getTotal(): float;
 
-    public function getName();
+    public function getName(): string;
 
-    public function increaseQuantity();
+    public function increaseQuantity(): void;
 
-    public function decreaseQuantity();
+    /**
+     * @throws OrderQuantityException
+     */
+    public function decreaseQuantity(): void;
 }
