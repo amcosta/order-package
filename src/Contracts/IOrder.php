@@ -1,8 +1,6 @@
 <?php
 
-
 namespace App\Contracts;
-
 
 use Doctrine\Common\Collections\ArrayCollection;
 

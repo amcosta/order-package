@@ -1,10 +1,7 @@
 <?php
 
-
 namespace App\Traits;
 
-
-use App\Order;
 use JMS\Serializer\SerializerBuilder;
 
 trait Serializer
