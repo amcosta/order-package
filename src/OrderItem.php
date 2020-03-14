@@ -58,4 +58,14 @@ class OrderItem implements IOrderItem, \Serializable, \JsonSerializable
 
         $this->quantity--;
     }
+
+    public function isEquals(IOrderItem $item): bool
+    {
+        return $this->getIdentifyCode() === $item->getIdentifyCode();
+    }
+
+    public function getIdentifyCode()
+    {
+        return $this->product->getId();
+    }
 }

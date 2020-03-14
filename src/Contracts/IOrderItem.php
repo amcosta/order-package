@@ -20,4 +20,8 @@ interface IOrderItem
      * @throws OrderQuantityException
      */
     public function decreaseQuantity(): void;
+
+    public function getIdentifyCode();
+
+    public function isEquals(IOrderItem $item): bool;
 }

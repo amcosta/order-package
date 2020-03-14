@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Builder\OrderItemBuilder;
 use App\Contracts\IOrderItem;
 use App\Exceptions\OrderQuantityException;
 use App\OrderItem;
@@ -17,7 +18,13 @@ class OrderItemTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->item = new OrderItem(new Product('', 10));
+        parent::setUp();
+        $this->item = $this->buildOrderItem('', 10, 'uniqueId');
+    }
+
+    private function buildOrderItem($productName, $productPrice, $productId)
+    {
+        return (new OrderItemBuilder())->withDefault($productName, $productPrice)->withIdentifyCode($productId)->build();
     }
 
     public function testIncreaseAndDecreaseQuantity()
@@ -59,5 +66,14 @@ class OrderItemTest extends TestCase
         $string = serialize($this->item);
         $this->assertIsString($string);
         $this->assertInstanceOf(IOrderItem::class, unserialize($string));
+    }
+
+    public function testCompareItems()
+    {
+        $sameItem = $this->buildOrderItem('', 10, 'uniqueId');
+        $this->assertTrue($this->item->isEquals($sameItem));
+
+        $otherItem = $this->buildOrderItem('', 10, 'any');
+        $this->assertFalse($this->item->isEquals($otherItem));
     }
 }
