@@ -3,11 +3,17 @@
 namespace App;
 
 use App\Contracts\IProduct;
+use InvalidArgumentException;
 use JMS\Serializer\Annotation as Serializer;
 
 class Product implements IProduct, \Serializable, \JsonSerializable
 {
     use Traits\Serializer;
+
+    /**
+     * @Serializer\Type("string")
+     */
+    private $id;
 
     /**
      * @Serializer\Type("string")
@@ -19,10 +25,16 @@ class Product implements IProduct, \Serializable, \JsonSerializable
      */
     private float $price;
 
-    public function __construct(string $name, float $price)
+    public function __construct(string $name, float $price, $id = null)
     {
         $this->setName($name);
         $this->setPrice($price);
+        $this->id = $id ?? uniqid('_');
+    }
+
+    public function getId()
+    {
+        return $this->id;
     }
 
     public function getName(): string
@@ -38,7 +50,7 @@ class Product implements IProduct, \Serializable, \JsonSerializable
     private function setName(string $name)
     {
         if (!is_string($name)) {
-            throw new \InvalidArgumentException('The name of product must be a string');
+            throw new InvalidArgumentException('The name of product must be a string');
         }
 
         $this->name = $name;
@@ -47,11 +59,11 @@ class Product implements IProduct, \Serializable, \JsonSerializable
     private function setPrice(float $price)
     {
         if (!is_float($price)) {
-            throw new \InvalidArgumentException('The price of product must be a float');
+            throw new InvalidArgumentException('The price of product must be a float');
         }
 
         if ($price < 0) {
-            throw new \InvalidArgumentException('The price can not be below zero');
+            throw new InvalidArgumentException('The price can not be below zero');
         }
 
         $this->price = $price;

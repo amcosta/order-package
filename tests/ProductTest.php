@@ -39,4 +39,16 @@ class ProductTest extends TestCase
         $this->assertIsString($string);
         $this->assertInstanceOf(IProduct::class, unserialize($string));
     }
+
+    public function testProductId()
+    {
+        $product1 = new Product('Expensive Product', 999.99);
+        $this->assertIsString($product1->getId());
+
+        $product2 = new Product('Cheap Product', 5.10, 'SHA256');
+        $this->assertEquals('SHA256', $product2->getId());
+
+        $product2 = new Product('Just a Product', 10, 9000);
+        $this->assertEquals(9000, $product2->getId());
+    }
 }
