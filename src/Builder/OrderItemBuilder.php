@@ -18,6 +18,8 @@ class OrderItemBuilder implements IOrderItemBuilder
 
     private int $quantity = 1;
 
+    private $id = null;
+
     public function withProduct(IProduct $product): self
     {
         $this->product = $product;
@@ -37,9 +39,15 @@ class OrderItemBuilder implements IOrderItemBuilder
         return $this;
     }
 
+    public function withIdentifyCode($id): self
+    {
+        $this->id = $id;
+        return $this;
+    }
+
     public function build(): IOrderItem
     {
-        $product = $this->product ?? new Product($this->productName, $this->productPrice);
+        $product = $this->product ?? new Product($this->productName, $this->productPrice, $this->id);
         return new OrderItem($product, $this->quantity);
     }
 }

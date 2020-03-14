@@ -49,4 +49,18 @@ class OrderItemBuilderTest extends TestCase
         $this->assertEquals($productPrice * $productQuantity, $item->getTotal());
         $this->assertEquals($productQuantity, $item->getQuantity());
     }
+
+    public function testBuildWithId()
+    {
+        $productName = 'Fantastic product';
+        $productPrice = 100;
+        $productId = 'SHA1';
+
+        $item = (new OrderItemBuilder())->withDefault($productName, $productPrice)->withIdentifyCode($productId)->build();
+        $this->assertEquals($productId, $item->getIdentifyCode());
+
+        $item = (new OrderItemBuilder())->withDefault($productName, $productPrice)->build();
+        $this->assertIsString($item->getIdentifyCode());
+        $this->assertTrue($productId != $item->getIdentifyCode());
+    }
 }
