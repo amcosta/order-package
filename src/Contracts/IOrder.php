@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 interface IOrder
 {
-    public function getItems(): ArrayCollection;
+    public function getAllItems(): ArrayCollection;
 
     public function addItem(IOrderItem $item): void;
 

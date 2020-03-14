@@ -24,24 +24,21 @@ class Order implements IOrder, \Serializable, \JsonSerializable
 
     public function addItem(IOrderItem $item): void
     {
-        $key = $this->items->indexOf($item);
-
-        if ($key === false) {
+        try {
+            $item = $this->getItem($item);
+            $item->increaseQuantity();
+        } catch (\OutOfBoundsException $exception) {
             $this->items->add($item);
-        } else {
-            $this->items->get($key)->increaseQuantity();
         }
     }
 
-    public function removeItem(IOrderItem $item): void
+    public function removeItem(IOrderItem $reference): void
     {
-        $key = $this->items->indexOf($item);
-        if ($key === false) {
+        try {
+            $item = $this->getItem($reference);
+        } catch (\OutOfBoundsException $exception) {
             return;
         }
-
-        /* @var IOrderItem $item */
-        $item = $this->items->get($key);
 
         try {
             $item->decreaseQuantity();
@@ -72,8 +69,23 @@ class Order implements IOrder, \Serializable, \JsonSerializable
         return array_reduce($this->items->toArray(), $callback, 0);
     }
 
-    public function getItems(): ArrayCollection
+    public function getAllItems(): ArrayCollection
     {
         return $this->items;
+    }
+
+    public function getItem(IOrderItem $item): IOrderItem
+    {
+        $callback = function (IOrderItem $collectionItem) use ($item) {
+            return $collectionItem->isEquals($item);
+        };
+
+        $filteredItems = $this->items->filter($callback);
+        if ($filteredItems->count() === 0) {
+            throw new \OutOfBoundsException();
+        }
+
+        $key = $this->items->indexOf($filteredItems->first());
+        return $this->items->get($key);
     }
 }
